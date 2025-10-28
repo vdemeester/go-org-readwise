@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vdemeester/home/tools/go-org-readwise/internal/readwise"
+	"github.com/vdemeester/go-org-readwise/internal/readwise"
 )
 
 const (
