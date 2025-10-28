@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/vdemeester/home/tools/go-org-readwise/internal/org"
-	"github.com/vdemeester/home/tools/go-org-readwise/internal/readwise"
+	"github.com/vdemeester/go-org-readwise/internal/org"
+	"github.com/vdemeester/go-org-readwise/internal/readwise"
 )
 
 func main() {

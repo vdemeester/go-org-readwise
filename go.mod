@@ -1,3 +1,3 @@
-module github.com/vdemeester/home/tools/go-org-readwise
+module github.com/vdemeester/go-org-readwise
 
-go 1.22
+go 1.25
