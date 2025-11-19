@@ -4,6 +4,59 @@ This is a very very simple project that sync from readwise API to a
 set of org files in a folder. It implements just what is needed from
 the [readwise API](https://readwise.io/api_deets) to work.
 
+* Building and Running
+
+This project uses Nix flakes for development and builds.
+
+** With Nix
+
+*** Building
+
+#+begin_src bash
+# Build the project
+nix build
+
+# The binary will be available in ./result/bin/
+./result/bin/go-org-readwise --help
+#+end_src
+
+*** Running
+
+#+begin_src bash
+# Run directly with nix run
+nix run . -- -targetFolder /path/to/org/files -apiKeyFile /path/to/key
+
+# Or using environment variable for API key
+READWISE_KEY=your_key nix run . -- -targetFolder /path/to/org/files
+#+end_src
+
+*** Development Shell
+
+#+begin_src bash
+# Enter development shell with Go and other dependencies
+nix develop
+
+# Inside the dev shell, use standard Go commands
+go build
+go test -v ./...
+go run . -targetFolder /path/to/org/files
+#+end_src
+
+** Without Nix
+
+If you have Go installed, you can use standard Go commands:
+
+#+begin_src bash
+# Build
+go build -v ./...
+
+# Run tests
+go test -v ./...
+
+# Run the tool
+go run . -targetFolder /path/to/org/files -apiKeyFile /path/to/key
+#+end_src
+
 * Readwise API
 
 We are /only/ going to implement the export part of the API as, this should be the only one
