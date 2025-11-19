@@ -273,7 +273,11 @@ func archiveURL(ctx context.Context, targetFolder, denoteFilename, url string) (
 	// Run monolith command to archive the URL
 	// Use --isolate to prevent network requests for page resources
 	// Use --output to specify the output file
-	cmd := exec.CommandContext(ctx, "monolith", url, "--no-audio", "--no-video", "--isolate", "--output", archivePath)
+	cmd := exec.CommandContext(ctx, "monolith", url,
+		"--no-fonts", "--no-frames",
+		"--no-audio", "--no-video",
+		"--isolate",
+		"--output", archivePath)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("monolith command failed: %w, output: %s", err, string(output))
 	}
