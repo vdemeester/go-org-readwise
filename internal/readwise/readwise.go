@@ -59,7 +59,12 @@ func fetchExport(ctx context.Context, client *http.Client, apikey string, update
 		return export, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

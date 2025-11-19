@@ -46,7 +46,12 @@ func Sync(ctx context.Context, target string, results []readwise.Result) error {
 			if err != nil {
 				return err
 			}
-			defer f.Close()
+			defer func() {
+				err := f.Close()
+				if err != nil {
+					panic(err)
+				}
+			}()
 			if _, err = f.WriteString(string(content)); err != nil {
 				return err
 			}
@@ -97,10 +102,7 @@ func createPartialOrgDocument(r readwise.Result) PartialDocument {
 	return PartialDocument{
 		Date: now.Format(orgDateFormat),
 		Highlights: transformHighlights(r.Highlights, func(h readwise.Highlight) bool {
-			if h.HighlightedAt.After(now) {
-				return true
-			}
-			return false
+			return h.HighlightedAt.After(now)
 		}),
 	}
 }
