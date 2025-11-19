@@ -67,7 +67,7 @@ func Sync(ctx context.Context, target string, results []readwise.Result, archive
 			d := createNewOrgDocument(result)
 
 			// Archive URL if requested and SourceURL is available
-			if archiveURLs && result.SourceURL != "" {
+			if archiveURLs && result.SourceURL != "" && shouldArchiveURL(result.SourceURL) {
 				archivePath, err := archiveURL(ctx, target, denotefilename, result.SourceURL)
 				if err != nil {
 					// Log error but don't fail the sync
@@ -75,6 +75,8 @@ func Sync(ctx context.Context, target string, results []readwise.Result, archive
 				} else {
 					d.ArchivePath = archivePath
 				}
+			} else if archiveURLs && result.SourceURL != "" && !shouldArchiveURL(result.SourceURL) {
+				log.Printf("Skipping archive for %s (URL type not supported for archiving)", result.Title)
 			}
 
 			content, err := convertDocument(d)
@@ -224,6 +226,32 @@ func sluggify(s string) string {
 	return s
 }
 
+// shouldArchiveURL determines if a URL should be archived
+// Returns false for URLs that shouldn't be archived (e.g., YouTube videos, video platforms)
+func shouldArchiveURL(url string) bool {
+	// Skip YouTube videos and shorts
+	if strings.Contains(url, "youtube.com/watch") ||
+		strings.Contains(url, "youtube.com/shorts") ||
+		strings.Contains(url, "youtu.be/") {
+		return false
+	}
+
+	// Skip other video platforms that might be problematic
+	videoHosts := []string{
+		"vimeo.com",
+		"dailymotion.com",
+		"twitch.tv",
+	}
+
+	for _, host := range videoHosts {
+		if strings.Contains(url, host) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // archiveURL archives the given URL using monolith command and stores it in .archive folder
 // Returns the relative path to the archive file from the org file's perspective
 func archiveURL(ctx context.Context, targetFolder, denoteFilename, url string) (string, error) {
@@ -245,7 +273,7 @@ func archiveURL(ctx context.Context, targetFolder, denoteFilename, url string) (
 	// Run monolith command to archive the URL
 	// Use --isolate to prevent network requests for page resources
 	// Use --output to specify the output file
-	cmd := exec.CommandContext(ctx, "monolith", url, "--isolate", "--output", archivePath)
+	cmd := exec.CommandContext(ctx, "monolith", url, "--no-audio", "--no-video", "--isolate", "--output", archivePath)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("monolith command failed: %w, output: %s", err, string(output))
 	}

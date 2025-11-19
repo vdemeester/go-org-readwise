@@ -80,6 +80,11 @@ The codebase follows a clean 3-layer architecture:
    - Archives stored in `.archive/` folder with same naming as org files (`.html` extension)
    - Fails gracefully with warning if monolith not available or URL unreachable
    - Archive path added as `#+property: ARCHIVE:` header in org file
+   - **URL Filtering**: Certain URL types are automatically excluded from archiving:
+     - YouTube videos (youtube.com/watch, youtube.com/shorts, youtu.be)
+     - Video platforms (Vimeo, Twitch, Dailymotion)
+     - This prevents large video files from being downloaded and saves disk space
+     - Future consideration: Use yt-dlp for video archiving with proper size management
 
 ## Date/Time Formats
 
