@@ -36,15 +36,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error reading readwise state file from %s: %v", stateFile, err)
 	}
+
+	if updateAfter != nil {
+		log.Printf("Starting incremental sync (fetching highlights updated after %s)", updateAfter.Format(readwise.FormatUpdatedAfter))
+	} else {
+		log.Println("Starting full sync (no previous state found)")
+	}
+
 	ctx := context.Background()
 	results, err := readwise.FetchFromAPI(ctx, apikey, updateAfter)
 	if err != nil {
 		log.Fatalf("Error while fetching results: %v", err)
 	}
 
+	log.Printf("Fetched %d document(s) from Readwise API", len(results))
+
 	if err := org.Sync(ctx, *targetFolder, results, *archiveURLs); err != nil {
 		log.Fatalf("Error syncing readwise and org file in %s folder: %v", *targetFolder, err)
 	}
+
+	log.Println("Sync completed successfully")
 }
 
 func getUpdateAfterFromFile(stateFile string) (*time.Time, error) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,6 +30,8 @@ var (
 )
 
 func Sync(ctx context.Context, target string, results []readwise.Result, archiveURLs bool) error {
+	created := 0
+	updated := 0
 	for _, result := range results {
 		// FIXME: handle the case where tags where added after
 		// a sync. In that case, we want to try different
@@ -56,6 +59,9 @@ func Sync(ctx context.Context, target string, results []readwise.Result, archive
 			if _, err = f.WriteString(string(content)); err != nil {
 				return err
 			}
+			highlightCount := len(p.Highlights)
+			log.Printf("Updated '%s' (%s) with %d new highlight(s)", result.Title, result.Category, highlightCount)
+			updated++
 		} else if errors.Is(err, os.ErrNotExist) {
 			// Create the file
 			d := createNewOrgDocument(result)
@@ -78,12 +84,16 @@ func Sync(ctx context.Context, target string, results []readwise.Result, archive
 			if err := os.WriteFile(filename, content, 0o644); err != nil {
 				return err
 			}
+			highlightCount := len(d.Highlights)
+			log.Printf("Created '%s' (%s) with %d highlight(s)", result.Title, result.Category, highlightCount)
+			created++
 		} else {
 			// Schrodinger: file may or may not exist. See err for details.
 			// Therefore, do *NOT* use !os.IsNotExist(err) to test for file existence
 			return err
 		}
 	}
+	log.Printf("Summary: %d file(s) created, %d file(s) updated", created, updated)
 	return nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -22,17 +23,20 @@ func FetchFromAPI(ctx context.Context, apikey string, updateAfter *time.Time) ([
 	var e Export
 	var err error
 	var nextPageCursor *int = nil
+	pageNum := 1
 	for {
 		e, err = fetchExport(ctx, httpClient, apikey, updateAfter, nextPageCursor)
 		if err != nil {
 			return results, err
 		}
+		log.Printf("Fetched page %d: %d document(s) in this page", pageNum, len(e.Results))
 		results = append(results, e.Results...)
 		nextPageCursor = e.NextPageCursor
 		if nextPageCursor == nil {
 			// No more pages to fetch, we get out
 			break
 		}
+		pageNum++
 	}
 
 	return results, nil
