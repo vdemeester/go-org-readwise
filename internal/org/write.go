@@ -25,6 +25,7 @@ var (
 {{ if .FileTags }}#+filetags: {{ orgtags .FileTags }}{{ end }}
 #+property: READWISE_URL: {{ .ReadwiseURL }}
 {{ if .URL }}#+property: URL: {{ .URL }}{{ end }}
+{{ if .ArchivePath }}#+property: ARCHIVE: {{ .ArchivePath }}{{ end }}
 
 {{ .Summary }}
 

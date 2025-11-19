@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -27,7 +28,7 @@ var (
 	replaceHypensRegexp             = regexp.MustCompile("[-]+")
 )
 
-func Sync(ctx context.Context, target string, results []readwise.Result) error {
+func Sync(ctx context.Context, target string, results []readwise.Result, archiveURLs bool) error {
 	for _, result := range results {
 		// FIXME: handle the case where tags where added after
 		// a sync. In that case, we want to try different
@@ -58,6 +59,18 @@ func Sync(ctx context.Context, target string, results []readwise.Result) error {
 		} else if errors.Is(err, os.ErrNotExist) {
 			// Create the file
 			d := createNewOrgDocument(result)
+
+			// Archive URL if requested and SourceURL is available
+			if archiveURLs && result.SourceURL != "" {
+				archivePath, err := archiveURL(ctx, target, denotefilename, result.SourceURL)
+				if err != nil {
+					// Log error but don't fail the sync
+					fmt.Fprintf(os.Stderr, "Warning: failed to archive URL for %s: %v\n", result.Title, err)
+				} else {
+					d.ArchivePath = archivePath
+				}
+			}
+
 			content, err := convertDocument(d)
 			if err != nil {
 				return err
@@ -199,4 +212,34 @@ func sluggify(s string) string {
 	s = strings.TrimPrefix(s, "-")
 	s = strings.TrimSuffix(s, "-")
 	return s
+}
+
+// archiveURL archives the given URL using monolith command and stores it in .archive folder
+// Returns the relative path to the archive file from the org file's perspective
+func archiveURL(ctx context.Context, targetFolder, denoteFilename, url string) (string, error) {
+	// Create .archive folder if it doesn't exist
+	archiveDir := filepath.Join(targetFolder, ".archive")
+	if err := os.MkdirAll(archiveDir, 0o755); err != nil {
+		return "", fmt.Errorf("failed to create archive directory: %w", err)
+	}
+
+	// Generate archive filename: same as org file but with .html extension
+	archiveFilename := strings.TrimSuffix(denoteFilename, ".org") + ".html"
+	archivePath := filepath.Join(archiveDir, archiveFilename)
+
+	// Check if monolith is available
+	if _, err := exec.LookPath("monolith"); err != nil {
+		return "", fmt.Errorf("monolith command not found in PATH: %w", err)
+	}
+
+	// Run monolith command to archive the URL
+	// Use --isolate to prevent network requests for page resources
+	// Use --output to specify the output file
+	cmd := exec.CommandContext(ctx, "monolith", url, "--isolate", "--output", archivePath)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("monolith command failed: %w, output: %s", err, string(output))
+	}
+
+	// Return relative path from org file's perspective
+	return filepath.Join(".archive", archiveFilename), nil
 }

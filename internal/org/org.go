@@ -14,6 +14,7 @@ type Document struct {
 	Category    string
 	URL         string
 	ReadwiseURL string
+	ArchivePath string
 	Summary     string
 	Highlights  []Highlight
 }

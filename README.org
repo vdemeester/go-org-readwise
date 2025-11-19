@@ -28,6 +28,9 @@ nix run . -- -targetFolder /path/to/org/files -apiKeyFile /path/to/key
 
 # Or using environment variable for API key
 READWISE_KEY=your_key nix run . -- -targetFolder /path/to/org/files
+
+# Archive URLs using monolith (requires monolith to be installed)
+READWISE_KEY=your_key nix run . -- -targetFolder /path/to/org/files -archiveURLs
 #+end_src
 
 *** Development Shell
@@ -55,7 +58,23 @@ go test -v ./...
 
 # Run the tool
 go run . -targetFolder /path/to/org/files -apiKeyFile /path/to/key
+
+# Run with URL archiving
+go run . -targetFolder /path/to/org/files -apiKeyFile /path/to/key -archiveURLs
 #+end_src
+
+* Features
+
+** URL Archiving
+
+The tool supports archiving document URLs using the [[https://github.com/Y2Z/monolith][monolith]] command-line tool. When enabled with the =-archiveURLs= flag:
+
+- Archives are stored in a =.archive= folder within the target directory
+- Archive files use the same denote naming convention as the org files, with =.html= extension
+- The org file includes an =#+property: ARCHIVE:= header linking to the archived HTML file
+- If archiving fails (e.g., monolith not installed or URL unreachable), the sync continues with a warning
+
+*Requirements:* The =monolith= command must be installed and available in your PATH.
 
 * Readwise API
 
