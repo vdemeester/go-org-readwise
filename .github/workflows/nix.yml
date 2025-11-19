@@ -14,10 +14,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v27
+        uses: cachix/install-nix-action@0b0e072294b088b73964f1d72dfdac0951439dbd # v31.8.4
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
