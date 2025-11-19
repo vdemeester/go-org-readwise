@@ -15,6 +15,7 @@ import (
 func main() {
 	apiKeyFile := flag.String("apiKeyFile", "", "File to load the apiKey from. If empty, it will defer to the READWISE_KEY environment variable")
 	targetFolder := flag.String("targetFolder", "", "Folder to write highlights (in org file) into")
+	archiveURLs := flag.Bool("archiveURLs", false, "Archive document URLs using monolith command (stored in .archive folder)")
 	flag.Parse()
 
 	if *targetFolder == "" {
@@ -41,7 +42,7 @@ func main() {
 		log.Fatalf("Error while fetching results: %v", err)
 	}
 
-	if err := org.Sync(ctx, *targetFolder, results); err != nil {
+	if err := org.Sync(ctx, *targetFolder, results, *archiveURLs); err != nil {
 		log.Fatalf("Error syncing readwise and org file in %s folder: %v", *targetFolder, err)
 	}
 }
