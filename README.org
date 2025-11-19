@@ -1,8 +1,8 @@
-#+TITLE: `go-org-readwise`
+#+TITLE: go-org-readwise
 
 This is a very very simple project that sync from readwise API to a
 set of org files in a folder. It implements just what is needed from
-the [readwise API](https://readwise.io/api_deets) to work.
+the [[https://readwise.io/api_deets][Readwise API]] to work.
 
 * Building and Running
 
