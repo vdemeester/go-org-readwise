@@ -55,6 +55,11 @@ func main() {
 		log.Fatalf("Error syncing readwise and org file in %s folder: %v", *targetFolder, err)
 	}
 
+	// Write the current timestamp to state file for next incremental sync
+	if err := writeUpdateAfterToFile(stateFile, time.Now()); err != nil {
+		log.Fatalf("Error writing state file to %s: %v", stateFile, err)
+	}
+
 	log.Println("Sync completed successfully")
 }
 
@@ -72,4 +77,9 @@ func getUpdateAfterFromFile(stateFile string) (*time.Time, error) {
 		return nil, err
 	}
 	return &t, nil
+}
+
+func writeUpdateAfterToFile(stateFile string, t time.Time) error {
+	timestamp := t.Format(readwise.FormatUpdatedAfter)
+	return os.WriteFile(stateFile, []byte(timestamp), 0o644)
 }
